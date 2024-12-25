@@ -12,6 +12,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
+import useCategoryStore from '@/stores/category-store';
+import { Category } from '@/lib/types';
 
 interface CreateCategoryDialogProps {
   open: boolean;
@@ -20,10 +22,15 @@ interface CreateCategoryDialogProps {
 
 export function CreateCategoryDialog({ open, onOpenChange }: CreateCategoryDialogProps) {
   const [name, setName] = useState('');
+  const { createCategory } = useCategoryStore();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const category:Category = {
+      name,
+    }
     // Handle category creation
+    createCategory(category);
     onOpenChange(false);
   };
 

@@ -1,8 +1,10 @@
 export interface Category {
-  id: string;
+  id?: string;
   name: string;
-  astrologerCount: number;
-  order: number;
+  description?: string;
+  astrologersCount?: number;
+  status?: Boolean;
+  order?: number;
 }
 
 export interface Astrologer {

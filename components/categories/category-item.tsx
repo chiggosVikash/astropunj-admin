@@ -23,7 +23,7 @@ export function CategoryItem({ category }: CategoryItemProps) {
         <div className="flex-1">
           <h3 className="font-semibold">{category.name}</h3>
           <p className="text-sm text-muted-foreground">
-            {category.astrologerCount} Astrologers
+            {category.astrologersCount} Astrologers
           </p>
         </div>
         <div className="flex items-center gap-2">

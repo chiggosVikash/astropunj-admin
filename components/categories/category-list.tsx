@@ -3,20 +3,34 @@
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { Card } from '@/components/ui/card';
 import { CategoryItem } from './category-item';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { mockCategories } from '@/lib/mock-data';
+import { Category } from '@/lib/types';
 
-export function CategoryList() {
-  const [categories, setCategories] = useState(mockCategories);
+interface CategoryListProps {
+  categories: Category[];
+}
+
+export function CategoryList({ categories }: CategoryListProps) {
+  const [categoriList, setCategoryList] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const getCategoriesFromProps = async () => {
+      const datas: Category[] = await categories;
+      setCategoryList(datas);
+    };
+
+    getCategoriesFromProps();
+  }, [categories]);
 
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
 
-    const items = Array.from(categories);
+    const items:Category[] = Array.from(categoriList);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    setCategories(items);
+    setCategoryList(items);
   };
 
   return (
@@ -28,10 +42,10 @@ export function CategoryList() {
             ref={provided.innerRef}
             className="space-y-4"
           >
-            {categories.map((category, index) => (
+            {categoriList.map((category, index) => (
               <Draggable
-                key={category.id}
-                draggableId={category.id}
+                key={category?.id ?? index.toString()}
+                draggableId={category.id ?? index.toString()}
                 index={index}
               >
                 {(provided) => (

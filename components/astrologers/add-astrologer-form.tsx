@@ -21,8 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useCallback, useState,useEffect } from "react";
 import { ImageUpload } from "./image-upload";
+import useCategoryStore from "@/stores/category-store";
 
 const formSchema = z.object({
   category: z.string().min(1, "Category is required"),
@@ -40,13 +41,13 @@ const formSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters"),
 });
 
-const categories = [
-  "Vedic Astrology",
-  "Tarot Reading",
-  "Numerology",
-  "Palmistry",
-  "Vastu",
-];
+// const categories = [
+//   "Vedic Astrology",
+//   "Tarot Reading",
+//   "Numerology",
+//   "Palmistry",
+//   "Vastu",
+// ];
 
 const languages = [
   "English",
@@ -64,6 +65,17 @@ interface AddAstrologerFormProps {
 
 export function AddAstrologerForm({ onSuccess }: AddAstrologerFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+
+  const {categories,getCategories} = useCategoryStore();
+
+  const fetchCategories = useCallback(async() =>{
+    // Fetch categories from the server
+    await getCategories();
+  },[getCategories]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -86,6 +98,7 @@ export function AddAstrologerForm({ onSuccess }: AddAstrologerFormProps) {
     try {
       setIsLoading(true);
       console.log(values); // Replace with API call
+      
       onSuccess();
     } catch (error) {
       console.error("Error adding astrologer:", error);
@@ -138,8 +151,8 @@ export function AddAstrologerForm({ onSuccess }: AddAstrologerFormProps) {
                       </FormControl>
                       <SelectContent>
                         {categories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
+                          <SelectItem key={category.id} value={category.id ?? ""}>
+                            {category.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -326,3 +339,4 @@ export function AddAstrologerForm({ onSuccess }: AddAstrologerFormProps) {
     </div>
   );
 }
+
