@@ -7,13 +7,34 @@ export interface Category {
   order?: number;
 }
 
+
 export interface Astrologer {
-  id: string;
+  id?: string;
   name: string;
+  categoryId: string;
+  category?: Category;
+  profilePic: string;
+  mobile: string;
+  userId?: string;
+  password?: string;
   expertise: string[];
-  rating: number;
-  categoryIds: string[];
+  languages: string;
+  experienceInYear: number;
+  ratePerMinute: number;
+  description: string;
+  AstroKyc?: AstroKyc;
 }
+
+export interface AstroKyc {
+  id: string;
+  astroId: string;
+  panCard: string;
+  aadhar: string;
+  bankName: string;
+  accountNo: string;
+  ifscCode: string;
+}
+
 
 export interface User {
   id: string;

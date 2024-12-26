@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCallback, useState,useEffect } from "react";
 import { ImageUpload } from "./image-upload";
 import useCategoryStore from "@/stores/category-store";
+import useAstrologerStore from "@/stores/astrologer-store";
 
 const formSchema = z.object({
   category: z.string().min(1, "Category is required"),
@@ -32,7 +33,7 @@ const formSchema = z.object({
     .min(2, "Astrologer name must be at least 2 characters"),
   profileName: z.string().min(2, "Profile name must be at least 2 characters"),
   image: z.string().min(1, "Profile image is required"),
-  mobile: z.number().min(10, "Mobile number must be at least 10 digits"),
+  mobile: z.string().min(10, "Mobile number must be at least 10 digits"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   expertise: z.string().min(1, "Expertise is required"),
   language: z.string().min(1, "Language is required"),
@@ -68,6 +69,9 @@ export function AddAstrologerForm({ onSuccess }: AddAstrologerFormProps) {
 
   const {categories,getCategories} = useCategoryStore();
 
+  const {saveAstrologer} = useAstrologerStore();
+  
+
   const fetchCategories = useCallback(async() =>{
     // Fetch categories from the server
     await getCategories();
@@ -84,7 +88,7 @@ export function AddAstrologerForm({ onSuccess }: AddAstrologerFormProps) {
       astrologerName: "",
       profileName: "",
       image: "",
-      mobile: undefined,
+      mobile: "",
       password: "",
       expertise: "",
       language: "",
@@ -97,7 +101,19 @@ export function AddAstrologerForm({ onSuccess }: AddAstrologerFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      console.log(values); // Replace with API call
+
+      saveAstrologer({
+        name: values.astrologerName,
+        categoryId: values.category,
+        profilePic: values.image,
+        mobile: values.mobile,
+        password: values.password,
+        expertise: values.expertise.split(","),
+        languages: values.language,
+        experienceInYear: parseInt(values.experience),
+        ratePerMinute: parseInt(values.ratePerMin),
+        description: values.description
+      })
       
       onSuccess();
     } catch (error) {

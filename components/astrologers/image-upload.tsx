@@ -4,6 +4,7 @@ import { CameraIcon, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import useImageStore from '@/stores/image-store';
 
 interface ImageUploadProps {
   disabled?: boolean;
@@ -16,7 +17,9 @@ export function ImageUpload({
   onChange,
   value,
 }: ImageUploadProps) {
-  const [base64, setBase64] = useState(value);
+  // const [base64, setBase64] = useState(value);
+
+  const { setBase64Image,base64,clearBase64 } = useImageStore();
 
   const handleChange = useCallback(
     (base64: string) => {
@@ -30,18 +33,18 @@ export function ImageUpload({
       const file = files[0];
       const reader = new FileReader();
       reader.onload = (event: any) => {
-        setBase64(event.target.result);
+        setBase64Image(event.target.result,file.name,'astrologers');
         handleChange(event.target.result);
       };
       reader.readAsDataURL(file);
     },
-    [handleChange]
+    [handleChange,setBase64Image]
   );
 
   const handleRemove = useCallback(() => {
-    setBase64('');
+    clearBase64();
     handleChange('');
-  }, [handleChange]);
+  }, [handleChange,clearBase64]);
 
   const { getRootProps, getInputProps } = useDropzone({
     maxFiles: 1,
