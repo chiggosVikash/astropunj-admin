@@ -5,5 +5,6 @@ export const endpoints = {
   category: `/admin/category`,
   astrologer: `/astrologers`,
   users: `/users`,
+  imageUploadSign: '/image-signed'
 };
 
