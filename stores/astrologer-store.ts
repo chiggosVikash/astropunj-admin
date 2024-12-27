@@ -14,6 +14,7 @@ export interface IAstrologerStore {
   ) => Promise<ImageUploadSignResponse>;
   uploadImage: (uploadInfo: ImageUploadSignResponse) => Promise<string>;
   saveAstrologer: (astrologer: Astrologer) => Promise<void>;
+  setProcessing: (isProcessing: boolean) => void;
 }
 
 export interface ImageUploadSignResponse {
@@ -26,24 +27,22 @@ const useAstrologerStore = create<IAstrologerStore>((set,get) => ({
   astrologers: [],
   isProcessing: false,
   success: false,
+
+
+  setProcessing: (isProcessing: boolean) => {
+    set({ isProcessing });
+  },
   saveAstrologer: async (astrologer: Astrologer) => {
     try {
       set({ isProcessing: true });
-      const fileName = useImageStore.getState().fileName;
-        const directory = useImageStore.getState().directory;
-      const signedResponse = await get().signImageUpload(
-        fileName || Date.now().toString(),
-        directory || "astrologers"
-      )
-        const imageUrl = await get().uploadImage(signedResponse);
-        astrologer.profilePic = imageUrl;
+     
         console.log(astrologer);
-    //   const response = await apiClient.post(endpoints.astrologer, astrologer);
-    //   if (response.status === 201) {
-    //     set({ isProcessing: false, success: true });
-    //   } else {
-    //     throw new Error("Failed to save astrologer");
-    //   }
+      const response = await apiClient.post(endpoints.astrologer, astrologer);
+      if (response.status === 201) {
+        set({ isProcessing: false, success: true });
+      } else {
+        throw new Error("Failed to save astrologer");
+      }
     } catch (e) {
       set({ isProcessing: false, success: false });
       throw new Error("Failed to save astrologer");
@@ -72,7 +71,6 @@ const useAstrologerStore = create<IAstrologerStore>((set,get) => ({
     try {
       const imageBase64 = useImageStore.getState().base64;
       const fileName = useImageStore.getState().fileName;
-      const directory = useImageStore.getState().directory;
       if (!imageBase64) {
         throw new Error("No image to upload");
       }
@@ -80,13 +78,20 @@ const useAstrologerStore = create<IAstrologerStore>((set,get) => ({
       if (!cloudName) {
         throw new Error("Cloudinary cloud name not found");
       }
+
       const formData = new FormData();
       formData.append("file", imageBase64);
       formData.append("api_key", uploadInfo.apiKey);
       formData.append("timestamp", uploadInfo.timestamp.toString());
       formData.append("signature", uploadInfo.signature);
-      formData.append("folder", directory || "astrologers");
+      formData.append("upload_preset", "astropunj");
       formData.append("public_id", fileName || uploadInfo.timestamp.toString());
+
+      console.log("Api key", uploadInfo.apiKey);
+      console.log("Timestamp", uploadInfo.timestamp);
+      console.log("Signature", uploadInfo.signature);
+      console.log("File name", fileName);
+      
       const uploadResponse = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
         {

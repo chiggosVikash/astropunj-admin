@@ -19,7 +19,7 @@ export function ImageUpload({
 }: ImageUploadProps) {
   // const [base64, setBase64] = useState(value);
 
-  const { setBase64Image,base64,clearBase64 } = useImageStore();
+  const { setBase64Image,base64,clearBase64,addImageFile,clearImageFile } = useImageStore();
 
   const handleChange = useCallback(
     (base64: string) => {
@@ -33,18 +33,21 @@ export function ImageUpload({
       const file = files[0];
       const reader = new FileReader();
       reader.onload = (event: any) => {
-        setBase64Image(event.target.result,file.name,'astrologers');
+        setBase64Image(event.target.result,file.name,'profile/images');
+        addImageFile(file);
         handleChange(event.target.result);
       };
       reader.readAsDataURL(file);
     },
-    [handleChange,setBase64Image]
+    [handleChange,setBase64Image,addImageFile]
   );
 
   const handleRemove = useCallback(() => {
     clearBase64();
     handleChange('');
-  }, [handleChange,clearBase64]);
+    clearImageFile();
+    
+  }, [handleChange,clearBase64,clearImageFile]);
 
   const { getRootProps, getInputProps } = useDropzone({
     maxFiles: 1,

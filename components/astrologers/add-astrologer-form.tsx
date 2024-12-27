@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import  useImageStore from "@/stores/image-store";
 import {
   Form,
   FormControl,
@@ -25,6 +26,7 @@ import { useCallback, useState,useEffect } from "react";
 import { ImageUpload } from "./image-upload";
 import useCategoryStore from "@/stores/category-store";
 import useAstrologerStore from "@/stores/astrologer-store";
+import { saveImage } from "@/lib/saveImage";
 
 const formSchema = z.object({
   category: z.string().min(1, "Category is required"),
@@ -70,6 +72,60 @@ export function AddAstrologerForm({ onSuccess }: AddAstrologerFormProps) {
   const {categories,getCategories} = useCategoryStore();
 
   const {saveAstrologer} = useAstrologerStore();
+  const { imageFile } = useImageStore();
+
+  const saveAstrologerFunc = async (values: z.infer<typeof formSchema>) => {
+    try {
+      console.log("Save astrologer function called");
+      if(!imageFile){
+        throw new Error("Profile image is required");
+      }
+
+      const imageUrl = await saveImage(imageFile);
+      console.log("Uploaded image url",imageUrl);
+      saveAstrologer({
+        name: values.astrologerName,
+        categoryId: values.category,
+        profilePic: imageUrl,
+        mobile: values.mobile,
+        password: values.password,
+        expertise: values.expertise.split(","),
+        languages: values.language,
+        experienceInYear: parseInt(values.experience),
+        ratePerMinute: parseInt(values.ratePerMin),
+        description: values.description
+      })
+
+    }catch(e){
+      console.error("Error adding astrologer:", e);
+    }
+
+  }
+
+  // create a server component to save image
+  // const saveImage = async (image: File) => {
+  //   'use server';
+  //   cloudinary.config({
+  //     cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  //     api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+  //     api_secret: process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET
+  //   });
+
+  //   return new Promise((resolve, reject) => {
+  //     const uploadStream = cloudinary.uploader.upload_stream((error, result) => {
+  //       if (error) {
+  //         reject(error);
+  //       } else {
+  //         resolve(result?.secure_url);
+  //       }
+  //     });
+
+  //     image.arrayBuffer().then(arrayBuffer => {
+  //       const imageBuffer = Buffer.from(arrayBuffer);
+  //       uploadStream.end(imageBuffer);
+  //     }).catch(reject);
+  //   });
+  // }
   
 
   const fetchCategories = useCallback(async() =>{
@@ -101,20 +157,7 @@ export function AddAstrologerForm({ onSuccess }: AddAstrologerFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-
-      saveAstrologer({
-        name: values.astrologerName,
-        categoryId: values.category,
-        profilePic: values.image,
-        mobile: values.mobile,
-        password: values.password,
-        expertise: values.expertise.split(","),
-        languages: values.language,
-        experienceInYear: parseInt(values.experience),
-        ratePerMinute: parseInt(values.ratePerMin),
-        description: values.description
-      })
-      
+      await saveAstrologerFunc(values);
       onSuccess();
     } catch (error) {
       console.error("Error adding astrologer:", error);
